@@ -1,0 +1,4 @@
+image_compressor
+*.o
+*.out
+results/
