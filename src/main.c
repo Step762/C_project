@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "bmp.h"
 
 void print_usage(const char *program_name) {
     printf("Usage: %s <input.bmp> <output.bmp>\n", program_name);
@@ -16,6 +17,18 @@ int main(int argc, char *argv[]) {
     printf("Image compression project: SVD and JPEG\n");
     printf("Input file: %s\n", input_filename);
     printf("Output file: %s\n", output_filename);
+
+    Image test_image = create_empty_image(10, 10);
+
+    if (test_image.data == NULL) {
+        printf("Failed to create test image\n");
+        return 1;
+    }
+
+    print_image_info(&test_image);
+    free_image(&test_image);
+
+    printf("BMP image module is ready\n");
 
     return 0;
 }
