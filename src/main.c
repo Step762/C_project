@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "bmp.h"
 
 void print_usage(const char *program_name) {
@@ -18,17 +19,33 @@ int main(int argc, char *argv[]) {
     printf("Input file: %s\n", input_filename);
     printf("Output file: %s\n", output_filename);
 
-    Image test_image = create_empty_image(10, 10);
+    int width;
+    int height;
+    int bits_per_pixel;
+
+    if (!read_bmp_info(input_filename, &width, &height, &bits_per_pixel)) {
+        printf("Failed to read BMP information\n");
+        return 1;
+    }
+
+    printf("BMP information:\n");
+    printf("Width: %d\n", width);
+    printf("Height: %d\n", height);
+    printf("Bits per pixel: %d\n", bits_per_pixel);
+
+    if (bits_per_pixel != 24) {
+        printf("Warning: this project will work only with 24-bit BMP images\n");
+    }
+
+    Image test_image = create_empty_image(width, height);
 
     if (test_image.data == NULL) {
-        printf("Failed to create test image\n");
+        printf("Failed to create image structure\n");
         return 1;
     }
 
     print_image_info(&test_image);
     free_image(&test_image);
-
-    printf("BMP image module is ready\n");
 
     return 0;
 }
