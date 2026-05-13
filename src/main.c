@@ -19,33 +19,18 @@ int main(int argc, char *argv[]) {
     printf("Input file: %s\n", input_filename);
     printf("Output file: %s\n", output_filename);
 
-    int width;
-    int height;
-    int bits_per_pixel;
+    Image image = load_bmp(input_filename);
 
-    if (!read_bmp_info(input_filename, &width, &height, &bits_per_pixel)) {
-        printf("Failed to read BMP information\n");
+    if (image.data == NULL) {
+        printf("Failed to load BMP image\n");
         return 1;
     }
 
-    printf("BMP information:\n");
-    printf("Width: %d\n", width);
-    printf("Height: %d\n", height);
-    printf("Bits per pixel: %d\n", bits_per_pixel);
+    printf("BMP image loaded successfully\n");
+    print_image_info(&image);
+    print_first_pixel(&image);
 
-    if (bits_per_pixel != 24) {
-        printf("Warning: this project will work only with 24-bit BMP images\n");
-    }
-
-    Image test_image = create_empty_image(width, height);
-
-    if (test_image.data == NULL) {
-        printf("Failed to create image structure\n");
-        return 1;
-    }
-
-    print_image_info(&test_image);
-    free_image(&test_image);
+    free_image(&image);
 
     return 0;
 }

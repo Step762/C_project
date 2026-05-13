@@ -11,5 +11,7 @@ Image create_empty_image(int width, int height);
 void free_image(Image *img);
 void print_image_info(const Image *img);
 int read_bmp_info(const char *filename, int *width, int *height, int *bits_per_pixel);
+Image load_bmp(const char *filename);
+void print_first_pixel(const Image *img);
 
 #endif
