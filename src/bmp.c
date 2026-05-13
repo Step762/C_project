@@ -162,6 +162,84 @@ Image load_bmp(const char *filename) {
     return img;
 }
 
+int save_bmp(const char *filename, const Image *img) {
+    if (img == NULL || img->data == NULL) {
+        printf("No image data to save\n");
+        return 0;
+    }
+
+    FILE *file = fopen(filename, "wb");
+
+    if (file == NULL) {
+        printf("Cannot create file: %s\n", filename);
+        return 0;
+    }
+
+    int width = img->width;
+    int height = img->height;
+
+    int row_size = width * 3;
+    int padding = (4 - (row_size % 4)) % 4;
+    int row_size_with_padding = row_size + padding;
+
+    uint32_t pixel_offset = 54;
+    uint32_t file_size = pixel_offset + row_size_with_padding * height;
+
+    uint32_t info_header_size = 40;
+    uint16_t planes = 1;
+    uint16_t bits_per_pixel = 24;
+    uint32_t compression = 0;
+    uint32_t image_size = row_size_with_padding * height;
+    int32_t x_pixels_per_meter = 2835;
+    int32_t y_pixels_per_meter = 2835;
+    uint32_t colors_used = 0;
+    uint32_t important_colors = 0;
+
+    unsigned char signature[2] = {'B', 'M'};
+
+    fwrite(signature, sizeof(unsigned char), 2, file);
+    fwrite(&file_size, sizeof(uint32_t), 1, file);
+
+    uint32_t reserved = 0;
+    fwrite(&reserved, sizeof(uint32_t), 1, file);
+
+    fwrite(&pixel_offset, sizeof(uint32_t), 1, file);
+
+    fwrite(&info_header_size, sizeof(uint32_t), 1, file);
+    fwrite(&width, sizeof(int32_t), 1, file);
+    fwrite(&height, sizeof(int32_t), 1, file);
+    fwrite(&planes, sizeof(uint16_t), 1, file);
+    fwrite(&bits_per_pixel, sizeof(uint16_t), 1, file);
+    fwrite(&compression, sizeof(uint32_t), 1, file);
+    fwrite(&image_size, sizeof(uint32_t), 1, file);
+    fwrite(&x_pixels_per_meter, sizeof(int32_t), 1, file);
+    fwrite(&y_pixels_per_meter, sizeof(int32_t), 1, file);
+    fwrite(&colors_used, sizeof(uint32_t), 1, file);
+    fwrite(&important_colors, sizeof(uint32_t), 1, file);
+
+    unsigned char padding_bytes[3] = {0, 0, 0};
+
+    for (int y = height - 1; y >= 0; y--) {
+        for (int x = 0; x < width; x++) {
+            int index = (y * width + x) * 3;
+
+            unsigned char r = img->data[index];
+            unsigned char g = img->data[index + 1];
+            unsigned char b = img->data[index + 2];
+
+            fwrite(&b, sizeof(unsigned char), 1, file);
+            fwrite(&g, sizeof(unsigned char), 1, file);
+            fwrite(&r, sizeof(unsigned char), 1, file);
+        }
+
+        fwrite(padding_bytes, sizeof(unsigned char), padding, file);
+    }
+
+    fclose(file);
+
+    return 1;
+}
+
 void print_first_pixel(const Image *img) {
     if (img == NULL || img->data == NULL) {
         return;

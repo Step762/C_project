@@ -30,6 +30,14 @@ int main(int argc, char *argv[]) {
     print_image_info(&image);
     print_first_pixel(&image);
 
+    if (!save_bmp(output_filename, &image)) {
+        printf("Failed to save BMP image\n");
+        free_image(&image);
+        return 1;
+    }
+
+    printf("BMP image saved successfully\n");
+
     free_image(&image);
 
     return 0;
