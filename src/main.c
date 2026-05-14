@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "bmp.h"
+#include "processing.h"
 
 void print_usage(const char *program_name) {
     printf("Usage: %s <input.bmp> <output.bmp>\n", program_name);
@@ -28,6 +29,11 @@ int main(int argc, char *argv[]) {
 
     printf("BMP image loaded successfully\n");
     print_image_info(&image);
+    print_first_pixel(&image);
+
+    convert_to_grayscale(&image);
+
+    printf("Image converted to grayscale\n");
     print_first_pixel(&image);
 
     if (!save_bmp(output_filename, &image)) {
