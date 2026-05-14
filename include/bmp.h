@@ -8,6 +8,7 @@ typedef struct {
 } Image;
 
 Image create_empty_image(int width, int height);
+Image copy_image(const Image *src);
 void free_image(Image *img);
 void print_image_info(const Image *img);
 

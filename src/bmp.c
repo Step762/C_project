@@ -20,6 +20,31 @@ Image create_empty_image(int width, int height) {
     return img;
 }
 
+Image copy_image(const Image *src) {
+    Image copy;
+    copy.width = 0;
+    copy.height = 0;
+    copy.data = NULL;
+
+    if (src == NULL || src->data == NULL) {
+        return copy;
+    }
+
+    copy = create_empty_image(src->width, src->height);
+
+    if (copy.data == NULL) {
+        return copy;
+    }
+
+    int size = src->width * src->height * 3;
+
+    for (int i = 0; i < size; i++) {
+        copy.data[i] = src->data[i];
+    }
+
+    return copy;
+}
+
 void free_image(Image *img) {
     if (img == NULL) {
         return;

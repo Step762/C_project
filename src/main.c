@@ -2,6 +2,7 @@
 
 #include "bmp.h"
 #include "processing.h"
+#include "metrics.h"
 
 void print_usage(const char *program_name) {
     printf("Usage: %s <input.bmp> <output.bmp>\n", program_name);
@@ -20,31 +21,42 @@ int main(int argc, char *argv[]) {
     printf("Input file: %s\n", input_filename);
     printf("Output file: %s\n", output_filename);
 
-    Image image = load_bmp(input_filename);
+    Image original = load_bmp(input_filename);
 
-    if (image.data == NULL) {
+    if (original.data == NULL) {
         printf("Failed to load BMP image\n");
         return 1;
     }
 
-    printf("BMP image loaded successfully\n");
-    print_image_info(&image);
-    print_first_pixel(&image);
+    Image processed = copy_image(&original);
 
-    convert_to_grayscale(&image);
+    if (processed.data == NULL) {
+        printf("Failed to copy image\n");
+        free_image(&original);
+        return 1;
+    }
+
+    printf("BMP image loaded successfully\n");
+    print_image_info(&original);
+
+    convert_to_grayscale(&processed);
 
     printf("Image converted to grayscale\n");
-    print_first_pixel(&image);
 
-    if (!save_bmp(output_filename, &image)) {
+    double psnr = calculate_psnr(&original, &processed);
+    printf("PSNR: %.2f dB\n", psnr);
+
+    if (!save_bmp(output_filename, &processed)) {
         printf("Failed to save BMP image\n");
-        free_image(&image);
+        free_image(&original);
+        free_image(&processed);
         return 1;
     }
 
     printf("BMP image saved successfully\n");
 
-    free_image(&image);
+    free_image(&original);
+    free_image(&processed);
 
     return 0;
 }
