@@ -1,25 +1,36 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "bmp.h"
 #include "processing.h"
 #include "metrics.h"
 
 void print_usage(const char *program_name) {
-    printf("Usage: %s <input.bmp> <output.bmp>\n", program_name);
+    printf("Usage: %s <mode> <input.bmp> <output.bmp>\n", program_name);
+    printf("Modes:\n");
+    printf("  grayscale   convert image to grayscale and calculate PSNR\n");
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc != 4) {
         print_usage(argv[0]);
         return 1;
     }
 
-    const char *input_filename = argv[1];
-    const char *output_filename = argv[2];
+    const char *mode = argv[1];
+    const char *input_filename = argv[2];
+    const char *output_filename = argv[3];
 
     printf("Image compression project: SVD and JPEG\n");
+    printf("Mode: %s\n", mode);
     printf("Input file: %s\n", input_filename);
     printf("Output file: %s\n", output_filename);
+
+    if (strcmp(mode, "grayscale") != 0) {
+        printf("Unknown mode: %s\n", mode);
+        print_usage(argv[0]);
+        return 1;
+    }
 
     Image original = load_bmp(input_filename);
 
