@@ -4,6 +4,7 @@
 #include "bmp.h"
 #include "processing.h"
 #include "metrics.h"
+#include "matrix.h"
 
 void print_usage(const char *program_name) {
     printf("Usage: %s <mode> <input.bmp> <output.bmp>\n", program_name);
@@ -19,35 +20,44 @@ int run_grayscale_mode(const char *input_filename, const char *output_filename) 
         return 1;
     }
 
-    Image processed = copy_image(&original);
+    printf("BMP image loaded successfully\n");
+    print_image_info(&original);
 
-    if (processed.data == NULL) {
-        printf("Failed to copy image\n");
+    Matrix brightness = image_to_grayscale_matrix(&original);
+
+    if (brightness.data == NULL) {
+        printf("Failed to create brightness matrix\n");
         free_image(&original);
         return 1;
     }
 
-    printf("BMP image loaded successfully\n");
-    print_image_info(&original);
+    Image processed = matrix_to_image(&brightness);
 
-    convert_to_grayscale(&processed);
+    if (processed.data == NULL) {
+        printf("Failed to convert matrix to image\n");
+        free_matrix(&brightness);
+        free_image(&original);
+        return 1;
+    }
 
-    printf("Image converted to grayscale\n");
+    printf("Image converted to grayscale matrix\n");
 
     double psnr = calculate_psnr(&original, &processed);
     printf("PSNR: %.2f dB\n", psnr);
 
     if (!save_bmp(output_filename, &processed)) {
         printf("Failed to save BMP image\n");
-        free_image(&original);
         free_image(&processed);
+        free_matrix(&brightness);
+        free_image(&original);
         return 1;
     }
 
     printf("BMP image saved successfully\n");
 
-    free_image(&original);
     free_image(&processed);
+    free_matrix(&brightness);
+    free_image(&original);
 
     return 0;
 }
