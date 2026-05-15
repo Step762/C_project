@@ -11,27 +11,7 @@ void print_usage(const char *program_name) {
     printf("  grayscale   convert image to grayscale and calculate PSNR\n");
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        print_usage(argv[0]);
-        return 1;
-    }
-
-    const char *mode = argv[1];
-    const char *input_filename = argv[2];
-    const char *output_filename = argv[3];
-
-    printf("Image compression project: SVD and JPEG\n");
-    printf("Mode: %s\n", mode);
-    printf("Input file: %s\n", input_filename);
-    printf("Output file: %s\n", output_filename);
-
-    if (strcmp(mode, "grayscale") != 0) {
-        printf("Unknown mode: %s\n", mode);
-        print_usage(argv[0]);
-        return 1;
-    }
-
+int run_grayscale_mode(const char *input_filename, const char *output_filename) {
     Image original = load_bmp(input_filename);
 
     if (original.data == NULL) {
@@ -70,4 +50,29 @@ int main(int argc, char *argv[]) {
     free_image(&processed);
 
     return 0;
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 4) {
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    const char *mode = argv[1];
+    const char *input_filename = argv[2];
+    const char *output_filename = argv[3];
+
+    printf("Image compression project: SVD and JPEG\n");
+    printf("Mode: %s\n", mode);
+    printf("Input file: %s\n", input_filename);
+    printf("Output file: %s\n", output_filename);
+
+    if (strcmp(mode, "grayscale") == 0) {
+        return run_grayscale_mode(input_filename, output_filename);
+    }
+
+    printf("Unknown mode: %s\n", mode);
+    print_usage(argv[0]);
+
+    return 1;
 }
