@@ -13,7 +13,11 @@ void extract_block(const Matrix *matrix, int block_x, int block_y, double block[
 void forward_dct(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
                  double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
 
+void inverse_dct(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
+                 double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
+
 void print_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
 void print_dct_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
+void print_restored_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
 
 #endif

@@ -81,6 +81,27 @@ void forward_dct(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
     }
 }
 
+void inverse_dct(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
+                 double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            double sum = 0.0;
+
+            for (int v = 0; v < JPEG_BLOCK_SIZE; v++) {
+                for (int u = 0; u < JPEG_BLOCK_SIZE; u++) {
+                    double cos_x = cos(((2 * x + 1) * u * PI) / 16.0);
+                    double cos_y = cos(((2 * y + 1) * v * PI) / 16.0);
+
+                    sum += dct_coefficient(u) * dct_coefficient(v) *
+                           input[v][u] * cos_x * cos_y;
+                }
+            }
+
+            output[y][x] = 0.25 * sum + 128.0;
+        }
+    }
+}
+
 void print_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
     printf("First 8x8 block values:\n");
 
@@ -99,6 +120,18 @@ void print_dct_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
     for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
         for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
             printf("%8.1f ", block[y][x]);
+        }
+
+        printf("\n");
+    }
+}
+
+void print_restored_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    printf("Restored block after inverse DCT:\n");
+
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            printf("%6.1f ", block[y][x]);
         }
 
         printf("\n");
