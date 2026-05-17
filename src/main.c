@@ -93,9 +93,13 @@ int run_blocks_mode(const char *input_filename, const char *output_filename) {
     print_jpeg_blocks_info(&brightness);
 
     double first_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+    double dct_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
 
     extract_block(&brightness, 0, 0, first_block);
     print_block(first_block);
+
+    forward_dct(first_block, dct_block);
+    print_dct_block(dct_block);
 
     Image processed = matrix_to_image(&brightness);
 
