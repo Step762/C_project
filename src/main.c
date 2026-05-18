@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "bmp.h"
 #include "processing.h"
@@ -8,11 +9,15 @@
 #include "jpeg.h"
 
 void print_usage(const char *program_name) {
-    printf("Usage: %s <mode> <input.bmp> <output.bmp>\n", program_name);
-    printf("Modes:\n");
-    printf("  grayscale   convert image to grayscale and calculate PSNR\n");
-    printf("  blocks      show information about 8x8 blocks\n");
-    printf("  jpeg        apply simple JPEG-like compression\n");
+    printf("Usage:\n");
+    printf("  %s grayscale <input.bmp> <output.bmp>\n", program_name);
+    printf("  %s blocks <input.bmp> <output.bmp>\n", program_name);
+    printf("  %s jpeg <input.bmp> <output.bmp> <quality>\n", program_name);
+    printf("\n");
+    printf("Examples:\n");
+    printf("  %s grayscale images/test_beck.bmp output.bmp\n", program_name);
+    printf("  %s blocks images/test_beck.bmp output.bmp\n", program_name);
+    printf("  %s jpeg images/test_beck.bmp output.bmp 1.0\n", program_name);
 }
 
 int run_grayscale_mode(const char *input_filename, const char *output_filename) {
@@ -105,10 +110,10 @@ int run_blocks_mode(const char *input_filename, const char *output_filename) {
     forward_dct(first_block, dct_block);
     print_dct_block(dct_block);
 
-    quantize_block(dct_block, quantized_block);
+    quantize_block(dct_block, quantized_block, 1.0);
     print_quantized_block(quantized_block);
 
-    dequantize_block(quantized_block, dequantized_block);
+    dequantize_block(quantized_block, dequantized_block, 1.0);
 
     inverse_dct(dequantized_block, restored_block);
     print_restored_block(restored_block);
@@ -139,7 +144,7 @@ int run_blocks_mode(const char *input_filename, const char *output_filename) {
     return 0;
 }
 
-int run_jpeg_mode(const char *input_filename, const char *output_filename) {
+int run_jpeg_mode(const char *input_filename, const char *output_filename, double quality) {
     Image original = load_bmp(input_filename);
 
     if (original.data == NULL) {
@@ -149,6 +154,7 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename) {
 
     printf("BMP image loaded successfully\n");
     print_image_info(&original);
+    printf("JPEG quality factor: %.2f\n", quality);
 
     Matrix brightness = image_to_grayscale_matrix(&original);
 
@@ -167,7 +173,7 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename) {
 
     print_jpeg_blocks_info(&brightness);
 
-    Matrix jpeg_matrix = apply_jpeg_compression(&brightness);
+    Matrix jpeg_matrix = apply_jpeg_compression(&brightness, quality);;
 
     if (jpeg_matrix.data == NULL) {
         printf("Failed to apply JPEG compression\n");
@@ -215,7 +221,7 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
+    if (argc < 4) {
         print_usage(argv[0]);
         return 1;
     }
@@ -238,7 +244,20 @@ int main(int argc, char *argv[]) {
     }
 
     if (strcmp(mode, "jpeg") == 0) {
-        return run_jpeg_mode(input_filename, output_filename);
+        if (argc != 5) {
+            printf("JPEG mode requires quality parameter\n");
+            print_usage(argv[0]);
+            return 1;
+        }
+
+        double quality = atof(argv[4]);
+
+        if (quality <= 0.0) {
+            printf("Quality must be greater than 0\n");
+            return 1;
+        }
+
+        return run_jpeg_mode(input_filename, output_filename, quality);
     }
 
     printf("Unknown mode: %s\n", mode);

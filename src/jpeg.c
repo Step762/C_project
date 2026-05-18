@@ -128,24 +128,38 @@ void inverse_dct(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
 }
 
 void quantize_block(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
-                    int output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+                    int output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
+                    double quality) {
     for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
         for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
-            output[y][x] = (int)round(input[y][x] / quantization_table[y][x]);
+            double q = quantization_table[y][x] * quality;
+
+            if (q < 1.0) {
+                q = 1.0;
+            }
+
+            output[y][x] = (int)round(input[y][x] / q);
         }
     }
 }
 
 void dequantize_block(int input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
-                      double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+                      double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
+                      double quality) {
     for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
         for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
-            output[y][x] = input[y][x] * quantization_table[y][x];
+            double q = quantization_table[y][x] * quality;
+
+            if (q < 1.0) {
+                q = 1.0;
+            }
+
+            output[y][x] = input[y][x] * q;
         }
     }
 }
 
-Matrix apply_jpeg_compression(const Matrix *input) {
+Matrix apply_jpeg_compression(const Matrix *input, double quality) {
     Matrix output;
 
     output.width = 0;
@@ -176,8 +190,8 @@ Matrix apply_jpeg_compression(const Matrix *input) {
             extract_block(input, bx, by, block);
 
             forward_dct(block, dct_block);
-            quantize_block(dct_block, quantized_block);
-            dequantize_block(quantized_block, dequantized_block);
+            quantize_block(dct_block, quantized_block, quality);
+            dequantize_block(quantized_block, dequantized_block, quality);
             inverse_dct(dequantized_block, restored_block);
 
             insert_block(&output, bx, by, restored_block);
