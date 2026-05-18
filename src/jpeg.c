@@ -6,6 +6,17 @@
 
 #define PI 3.14159265358979323846
 
+static int quantization_table[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE] = {
+    {16, 11, 10, 16, 24, 40, 51, 61},
+    {12, 12, 14, 19, 26, 58, 60, 55},
+    {14, 13, 16, 24, 40, 57, 69, 56},
+    {14, 17, 22, 29, 51, 87, 80, 62},
+    {18, 22, 37, 56, 68, 109, 103, 77},
+    {24, 35, 55, 64, 81, 104, 113, 92},
+    {49, 64, 78, 87, 103, 121, 120, 101},
+    {72, 92, 95, 98, 112, 100, 103, 99}
+};
+
 int is_valid_jpeg_size(const Matrix *matrix) {
     if (matrix == NULL || matrix->data == NULL) {
         return 0;
@@ -102,6 +113,24 @@ void inverse_dct(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
     }
 }
 
+void quantize_block(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
+                    int output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            output[y][x] = (int)round(input[y][x] / quantization_table[y][x]);
+        }
+    }
+}
+
+void dequantize_block(int input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
+                      double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            output[y][x] = input[y][x] * quantization_table[y][x];
+        }
+    }
+}
+
 void print_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
     printf("First 8x8 block values:\n");
 
@@ -120,6 +149,18 @@ void print_dct_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
     for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
         for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
             printf("%8.1f ", block[y][x]);
+        }
+
+        printf("\n");
+    }
+}
+
+void print_quantized_block(int block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    printf("Quantized DCT coefficients:\n");
+
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            printf("%5d ", block[y][x]);
         }
 
         printf("\n");

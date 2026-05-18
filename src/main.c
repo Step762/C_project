@@ -94,6 +94,8 @@ int run_blocks_mode(const char *input_filename, const char *output_filename) {
 
     double first_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
     double dct_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+    int quantized_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+    double dequantized_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
     double restored_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
 
     extract_block(&brightness, 0, 0, first_block);
@@ -102,7 +104,12 @@ int run_blocks_mode(const char *input_filename, const char *output_filename) {
     forward_dct(first_block, dct_block);
     print_dct_block(dct_block);
 
-    inverse_dct(dct_block, restored_block);
+    quantize_block(dct_block, quantized_block);
+    print_quantized_block(quantized_block);
+
+    dequantize_block(quantized_block, dequantized_block);
+
+    inverse_dct(dequantized_block, restored_block);
     print_restored_block(restored_block);
 
     Image processed = matrix_to_image(&brightness);
