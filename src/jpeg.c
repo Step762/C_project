@@ -62,6 +62,20 @@ void extract_block(const Matrix *matrix, int block_x, int block_y, double block[
     }
 }
 
+static void insert_block(Matrix *matrix, int block_x, int block_y, double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    int start_x = block_x * JPEG_BLOCK_SIZE;
+    int start_y = block_y * JPEG_BLOCK_SIZE;
+
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            int image_x = start_x + x;
+            int image_y = start_y + y;
+
+            matrix->data[image_y * matrix->width + image_x] = block[y][x];
+        }
+    }
+}
+
 static double dct_coefficient(int index) {
     if (index == 0) {
         return 1.0 / sqrt(2.0);
@@ -129,6 +143,48 @@ void dequantize_block(int input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
             output[y][x] = input[y][x] * quantization_table[y][x];
         }
     }
+}
+
+Matrix apply_jpeg_compression(const Matrix *input) {
+    Matrix output;
+
+    output.width = 0;
+    output.height = 0;
+    output.data = NULL;
+
+    if (!is_valid_jpeg_size(input)) {
+        return output;
+    }
+
+    output = create_matrix(input->width, input->height);
+
+    if (output.data == NULL) {
+        return output;
+    }
+
+    int blocks_x = input->width / JPEG_BLOCK_SIZE;
+    int blocks_y = input->height / JPEG_BLOCK_SIZE;
+
+    for (int by = 0; by < blocks_y; by++) {
+        for (int bx = 0; bx < blocks_x; bx++) {
+            double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+            double dct_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+            int quantized_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+            double dequantized_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+            double restored_block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE];
+
+            extract_block(input, bx, by, block);
+
+            forward_dct(block, dct_block);
+            quantize_block(dct_block, quantized_block);
+            dequantize_block(quantized_block, dequantized_block);
+            inverse_dct(dequantized_block, restored_block);
+
+            insert_block(&output, bx, by, restored_block);
+        }
+    }
+
+    return output;
 }
 
 void print_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {

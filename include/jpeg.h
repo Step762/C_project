@@ -22,6 +22,8 @@ void quantize_block(double input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
 void dequantize_block(int input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
                       double output[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
 
+Matrix apply_jpeg_compression(const Matrix *input);
+
 void print_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
 void print_dct_block(double block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
 void print_quantized_block(int block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]);
