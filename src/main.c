@@ -173,7 +173,9 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename, doubl
 
     print_jpeg_blocks_info(&brightness);
 
-    Matrix jpeg_matrix = apply_jpeg_compression(&brightness, quality);;
+    JpegStats stats;
+
+    Matrix jpeg_matrix = apply_jpeg_compression(&brightness, quality, &stats);
 
     if (jpeg_matrix.data == NULL) {
         printf("Failed to apply JPEG compression\n");
@@ -198,6 +200,16 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename, doubl
     double psnr = calculate_psnr(&original_gray, &processed);
     printf("JPEG-like processing completed\n");
     printf("PSNR: %.2f dB\n", psnr);
+
+    double zero_percent = 0.0;
+
+    if (stats.total_coefficients > 0) {
+        zero_percent = 100.0 * stats.zero_coefficients / stats.total_coefficients;
+    }
+
+    printf("Total DCT coefficients: %d\n", stats.total_coefficients);
+    printf("Zero coefficients after quantization: %d\n", stats.zero_coefficients);
+    printf("Zero coefficients percent: %.2f%%\n", zero_percent);
 
     if (!save_bmp(output_filename, &processed)) {
         printf("Failed to save BMP image\n");

@@ -159,12 +159,31 @@ void dequantize_block(int input[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE],
     }
 }
 
-Matrix apply_jpeg_compression(const Matrix *input, double quality) {
+int count_zero_coefficients(int block[JPEG_BLOCK_SIZE][JPEG_BLOCK_SIZE]) {
+    int count = 0;
+
+    for (int y = 0; y < JPEG_BLOCK_SIZE; y++) {
+        for (int x = 0; x < JPEG_BLOCK_SIZE; x++) {
+            if (block[y][x] == 0) {
+                count++;
+            }
+        }
+    }
+
+    return count;
+}
+
+Matrix apply_jpeg_compression(const Matrix *input, double quality, JpegStats *stats) {
     Matrix output;
 
     output.width = 0;
     output.height = 0;
     output.data = NULL;
+
+    if (stats != NULL) {
+        stats->total_coefficients = 0;
+        stats->zero_coefficients = 0;
+    }
 
     if (!is_valid_jpeg_size(input)) {
         return output;
@@ -191,6 +210,12 @@ Matrix apply_jpeg_compression(const Matrix *input, double quality) {
 
             forward_dct(block, dct_block);
             quantize_block(dct_block, quantized_block, quality);
+
+            if (stats != NULL) {
+                stats->total_coefficients += JPEG_BLOCK_SIZE * JPEG_BLOCK_SIZE;
+                stats->zero_coefficients += count_zero_coefficients(quantized_block);
+            }
+
             dequantize_block(quantized_block, dequantized_block, quality);
             inverse_dct(dequantized_block, restored_block);
 
