@@ -201,15 +201,27 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename, doubl
     printf("JPEG-like processing completed\n");
     printf("PSNR: %.2f dB\n", psnr);
 
+    int non_zero_coefficients = stats.total_coefficients - stats.zero_coefficients;
+
     double zero_percent = 0.0;
+    double non_zero_percent = 0.0;
+    double compression_ratio = 0.0;
 
     if (stats.total_coefficients > 0) {
         zero_percent = 100.0 * stats.zero_coefficients / stats.total_coefficients;
+        non_zero_percent = 100.0 * non_zero_coefficients / stats.total_coefficients;
+    }
+
+    if (non_zero_coefficients > 0) {
+        compression_ratio = (double)stats.total_coefficients / non_zero_coefficients;
     }
 
     printf("Total DCT coefficients: %d\n", stats.total_coefficients);
     printf("Zero coefficients after quantization: %d\n", stats.zero_coefficients);
     printf("Zero coefficients percent: %.2f%%\n", zero_percent);
+    printf("Non-zero coefficients after quantization: %d\n", non_zero_coefficients);
+    printf("Estimated useful coefficients percent: %.2f%%\n", non_zero_percent);
+    printf("Estimated compression ratio: %.2f:1\n", compression_ratio);
 
     if (!save_bmp(output_filename, &processed)) {
         printf("Failed to save BMP image\n");
