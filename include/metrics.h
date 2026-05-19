@@ -5,5 +5,6 @@
 
 double calculate_mse(const Image *original, const Image *processed);
 double calculate_psnr(const Image *original, const Image *processed);
+double calculate_ssim(const Image *original, const Image *processed);
 
 #endif

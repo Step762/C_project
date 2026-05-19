@@ -51,7 +51,10 @@ int run_grayscale_mode(const char *input_filename, const char *output_filename) 
     printf("Image converted to grayscale matrix\n");
 
     double psnr = calculate_psnr(&original, &processed);
+    double ssim = calculate_ssim(&original, &processed);
+
     printf("PSNR: %.2f dB\n", psnr);
+    printf("SSIM: %.4f\n", ssim);
 
     if (!save_bmp(output_filename, &processed)) {
         printf("Failed to save BMP image\n");
@@ -198,9 +201,12 @@ int run_jpeg_mode(const char *input_filename, const char *output_filename, doubl
     }
 
     double psnr = calculate_psnr(&original_gray, &processed);
+    double ssim = calculate_ssim(&original_gray, &processed);
+
     printf("JPEG-like processing completed\n");
     printf("PSNR: %.2f dB\n", psnr);
-
+    printf("SSIM: %.4f\n", ssim);
+    
     int non_zero_coefficients = stats.total_coefficients - stats.zero_coefficients;
 
     double zero_percent = 0.0;
